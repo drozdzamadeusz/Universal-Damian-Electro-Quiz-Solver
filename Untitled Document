@@ -1,0 +1,11 @@
+		/*varibleListHead = &(VaraibleObject){
+			.index = index,
+			.identificationMethod = identificationMethod,
+			.variableName = variableName,
+			.regexInput0 = regexInput0,
+			.regexInput1 = regexInput1,
+			.taskContent = taskContent,
+			.generatedRegex = regex,
+			.valueFound = valueFound,
+			.nextVaraible = NULL
+		};*/

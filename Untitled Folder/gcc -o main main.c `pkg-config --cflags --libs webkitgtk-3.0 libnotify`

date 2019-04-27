@@ -1,0 +1,2 @@
+gcc -o main main.c `pkg-config --cflags --libs webkitgtk-3.0 libnotify`
+

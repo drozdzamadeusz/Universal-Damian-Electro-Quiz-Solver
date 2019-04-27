@@ -1,0 +1,10 @@
+[default]
+name=Default
+runtime=host
+config-opts=
+run-opts=
+prefix=/home/amadeusz/.cache/gnome-builder/install/WebKit-JavaScriptCore-Extensions-master/host
+app-id=
+postbuild=
+prebuild=
+default=true
