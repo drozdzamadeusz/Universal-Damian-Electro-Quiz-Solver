@@ -36,8 +36,10 @@ char* getVaraibleFormText(char* RegexStr, char* source){
 
 	g_print("\n%s", RegexStr);
 
-	char *result = g_malloc(subject_length);
-	result = "";
+	//char *result = NULL;
+	char *result = strdup("");
+	//char *result = g_malloc(subject_length);
+	//result = "";
 
 	  re = pcre2_compile(
 	  pattern,               /* the pattern */

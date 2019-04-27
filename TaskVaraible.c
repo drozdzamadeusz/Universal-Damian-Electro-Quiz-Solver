@@ -98,11 +98,11 @@ VariableObject* addVariableObjectToList(short int index, short selectedMode, cha
 		VariableObject* searchedObject = findVariableObjectByIndex(index);
 		if(searchedObject){
 
-			/*if(searchedObject->variableName) g_free(searchedObject->variableName);
-			if(searchedObject->regexInput0) g_free(searchedObject->regexInput0);
-			//if(searchedObject->regexInput1) g_free(searchedObject->regexInput1);
-			if(searchedObject->generatedRegex) g_free(searchedObject->generatedRegex);
-			if(searchedObject->valueFound) g_free(searchedObject->valueFound);*/
+			g_free(searchedObject->variableName);
+			g_free(searchedObject->regexInput0);
+			g_free(searchedObject->regexInput1);
+			g_free(searchedObject->generatedRegex);
+			g_free(searchedObject->valueFound);
 
 
 
