@@ -18,6 +18,7 @@
 #include "TaskVariable.h"
 #include "TextProcessing.h"
 #include "MathEquationsParser.h"
+#include "ApiService.h"
 #include "Memd/mem.h"
 
 
@@ -151,20 +152,25 @@ static JSValueRef submitTaskCb(JSContextRef context, JSObjectRef function, JSObj
 
     cJSON* json = variablesObjectsToJsonArray(varibleListHead);
 
-    char resultValue[sizeof(task->resultValue)];
+    
    // memcpy(resultValue,&(task->resultValue),sizeof(task->resultValue));
 
-    sprintf(resultValue, "%lf", task->resultValue);
+
+    //char resultValue[sizeof(task->resultValue)];
+    //sprintf(resultValue, "%lf", task->resultValue);
 
     cJSON_AddStringToObject(json, "content", task->content);
     cJSON_AddStringToObject(json, "vriablesRegistered", task->vriablesRegistered);
     cJSON_AddStringToObject(json, "formula", task->formula);
     cJSON_AddStringToObject(json, "unit", task->unit);
     cJSON_AddStringToObject(json, "additionalInformation", task->additionalInformation);
-    cJSON_AddStringToObject(json, "resultValue", resultValue);
+    //cJSON_AddStringToObject(json, "resultValue", resultValue);
     
 
     g_print("%s\n", cJSON_Print(json));
+    
+
+    sendTaskToApi();
 
     return JSValueMakeUndefined(context);
 }
