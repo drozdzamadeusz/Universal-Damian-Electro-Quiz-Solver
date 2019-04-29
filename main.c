@@ -15,14 +15,30 @@
 
 #include "tinyexpr.h"
 
-#include "TaskVaraible.h"
+#include "TaskVariable.h"
 #include "TextProcessing.h"
 #include "MathEquationsParser.h"
 #include "Memd/mem.h"
 
 
 /* Class initialize */
-static void DataExchangeInitCb(JSContextRef ctx, JSObjectRef object){/* Inits DataExchange */}
+
+typedef struct Task{
+    char* content;
+    char* vriablesRegistered;
+    char* formula;
+    char* unit;
+    char* additionalInformation;
+    double resultValue;
+} Task;
+
+Task* task;
+
+
+static void DataExchangeInitCb(JSContextRef ctx, JSObjectRef object){
+/* Inits DataExchange */
+    task = (Task *)g_malloc(sizeof(Task));
+}
 
 
 /* Class constructor */
@@ -45,24 +61,31 @@ char* getStringValue(JSContextRef context, const JSValueRef jsValue){
 	return value;
 }
 
+
 /* DataExchange.getSubmittedTaskCb method callback implementation */
-static JSValueRef getSubmittedTaskCb(JSContextRef context, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception){
+static JSValueRef valiidateTaskCb(JSContextRef context, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception){
     /* At least, one argument must be received */
     //if (argumentCount == 1 && JSValueIsString(context, arguments[0])) {
         /* Converts JSValue to char */
 
 
-        char* task = getStringValue(context, arguments[0]);
-        char* taskVriablesRegister = getStringValue(context, arguments[1]);
+        char* taskContent = getStringValue(context, arguments[0]);
+        char* taskVriablesRegistered = getStringValue(context, arguments[1]);
         char* taskFormula = getStringValue(context, arguments[2]);
         char* taskUnit = getStringValue(context, arguments[3]);
         char* taskAdditionalInformation = getStringValue(context, arguments[4]);
 
 
-
         VariableObject* currentObj = varibleListHead;
 
-        if(!currentObj || task == "" || taskVriablesRegister == "" || taskFormula == "") return JSValueMakeUndefined(context);
+        if(!currentObj || taskVriablesRegistered == "" || taskFormula == "") return JSValueMakeUndefined(context);
+
+
+        task->content = taskContent;
+        task->vriablesRegistered = taskVriablesRegistered;
+        task->formula = taskFormula;
+        task->unit = taskUnit;
+        task->additionalInformation = taskAdditionalInformation;
 
         size_t formulaSize = strlen(taskFormula)+10;
         short int numberOfVaiables = 0;
@@ -99,6 +122,7 @@ static JSValueRef getSubmittedTaskCb(JSContextRef context, JSObjectRef function,
 
         if (expr) {
             double r = te_eval(expr);
+            task->resultValue = r;
             printf("KALKULATORED:%f\n", r);
 
             char* result = g_malloc(sizeof(r)+1000);
@@ -121,6 +145,29 @@ static JSValueRef getSubmittedTaskCb(JSContextRef context, JSObjectRef function,
     return JSValueMakeUndefined(context);
 }
 
+
+
+static JSValueRef submitTaskCb(JSContextRef context, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception){
+
+    cJSON* json = variablesObjectsToJsonArray(varibleListHead);
+
+    char resultValue[sizeof(task->resultValue)];
+   // memcpy(resultValue,&(task->resultValue),sizeof(task->resultValue));
+
+    sprintf(resultValue, "%lf", task->resultValue);
+
+    cJSON_AddStringToObject(json, "content", task->content);
+    cJSON_AddStringToObject(json, "vriablesRegistered", task->vriablesRegistered);
+    cJSON_AddStringToObject(json, "formula", task->formula);
+    cJSON_AddStringToObject(json, "unit", task->unit);
+    cJSON_AddStringToObject(json, "additionalInformation", task->additionalInformation);
+    cJSON_AddStringToObject(json, "resultValue", resultValue);
+    
+
+    g_print("%s\n", cJSON_Print(json));
+
+    return JSValueMakeUndefined(context);
+}
 
 
 /* DataExchange.findVariableCb method callback implementation */
@@ -153,14 +200,14 @@ static JSValueRef findVariableCb(JSContextRef context, JSObjectRef function, JSO
         }
 
 		char*  output = getVaraibleFormText(regex, taskContent);
-       
-        output = replace(output,  ".", ",");
-        output = replace(output,  " ", "");
-		output = replace(output,  "\n", "");
+    
 
+        output = replace(output,  " ", "");
+        output = replace(output,  "\n", "");   
 
         JSStringRef v = JSStringCreateWithUTF8CString(output);
 
+        output = replace(output,  ".", ",");
 
 		VariableObject* VariableObject = addVariableObjectToList(index, selectedMode, variableName, regexInput0, regexInput1, regex, output);
 
@@ -197,7 +244,8 @@ static JSValueRef findVariableCb(JSContextRef context, JSObjectRef function, JSO
 
 /* Class method declarations */
 static const JSStaticFunction DataExchangeStaticFunctions[] = {
-    { "submitTask", getSubmittedTaskCb, kJSPropertyAttributeReadOnly },
+    { "validateTask", valiidateTaskCb, kJSPropertyAttributeReadOnly },
+    { "submitTask", submitTaskCb, kJSPropertyAttributeReadOnly },
     { "findVariable", findVariableCb, kJSPropertyAttributeReadOnly },
     { NULL, NULL, 0 }
 };
