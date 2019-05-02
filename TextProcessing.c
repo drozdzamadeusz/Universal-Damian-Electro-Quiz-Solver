@@ -1,6 +1,15 @@
 #include "TextProcessing.h"
 
-
+void toUpperCase(char* str) {
+   int c = 0;
+   
+   while (str[c] != '\0') {
+      if (str[c] >= 'a' && str[c] <= 'z') {
+         str[c] = str[c] - 32;
+      }
+      c++;
+   }
+}
 char* replace(char* str, char* a, char* b){
     int len  = strlen(str);
     int lena = strlen(a), lenb = strlen(b);

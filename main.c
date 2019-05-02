@@ -20,7 +20,7 @@
 #include "MathEquationsParser.h"
 #include "ApiService.h"
 #include "Memd/mem.h"
-
+#include "preg_replace.h"
 
 /* Class initialize */
 
@@ -156,21 +156,29 @@ static JSValueRef submitTaskCb(JSContextRef context, JSObjectRef function, JSObj
    // memcpy(resultValue,&(task->resultValue),sizeof(task->resultValue));
 
 
-    //char resultValue[sizeof(task->resultValue)];
-    //sprintf(resultValue, "%lf", task->resultValue);
+    char resultValue[sizeof(task->resultValue)];
+    snprintf(resultValue, 8, "%.4f", task->resultValue);
 
     cJSON_AddStringToObject(json, "content", task->content);
     cJSON_AddStringToObject(json, "vriablesRegistered", task->vriablesRegistered);
     cJSON_AddStringToObject(json, "formula", task->formula);
     cJSON_AddStringToObject(json, "unit", task->unit);
     cJSON_AddStringToObject(json, "additionalInformation", task->additionalInformation);
-    //cJSON_AddStringToObject(json, "resultValue", resultValue);
+    cJSON_AddStringToObject(json, "resultValue", resultValue);
     
 
     g_print("%s\n", cJSON_Print(json));
+
+    char* contentSlug =  preg_replace("[^a-zA-Z]", "", task->content);
+    toUpperCase(contentSlug);
+
+
+    cJSON_AddStringToObject(json, "contentSlug", contentSlug);
     
 
-    sendTaskToApi();
+    sendTaskToApi(json);
+
+    g_free (contentSlug);
 
     return JSValueMakeUndefined(context);
 }
@@ -230,15 +238,6 @@ static JSValueRef findVariableCb(JSContextRef context, JSObjectRef function, JSO
 		}
 		
         g_free(taskContent);
-
-		/*
-        g_free(variableName);
-        g_free(regexInput0);
-        g_free(regexInput1);
-        g_free(regex);
-        g_free(output);*/
-
-		//printf("AAA:%s\n", varibleListHead->variableName);
 
 
         return JSValueMakeString(context, v);

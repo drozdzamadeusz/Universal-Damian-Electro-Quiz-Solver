@@ -13,4 +13,4 @@ OBJS = $(SOURCES:.c=.o)
 
 
 compile:
-	gcc -o main $(CFLAGS) -Imbedtls/include main.c TaskVariable.c TextProcessing.c MathEquationsParser.c ApiService.c https.c Memd/mem.c tinyexpr.c cJSON.c -lpcre2-8  `pkg-config --cflags --libs webkitgtk-3.0 libnotify` libmemd.a $(LIBS) -lm
+	gcc -o main $(CFLAGS) -Imbedtls/include main.c TaskVariable.c TextProcessing.c MathEquationsParser.c ApiService.c preg_replace.c https.c Memd/mem.c tinyexpr.c cJSON.c -lpcre2-8  `pkg-config --cflags --libs webkitgtk-3.0 libnotify` libmemd.a $(LIBS) -lm
