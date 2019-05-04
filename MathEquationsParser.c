@@ -6,7 +6,7 @@ bool isDouble(const char *str)
     int len;
     double doubleValue = 0.0;
     if (sscanf(str, "%lf %n", &doubleValue, &len) == 1 && len == (int)strlen(str)){
-    	printf("%lf\n", doubleValue);
+    	//printf("%lf\n", doubleValue);
         return true;
     }
     return false;

@@ -17,7 +17,10 @@
 
 
 #include "cJSON.h"
+#include "preg_replace.h"
 
+
+char* getContentSlug(char* content);
 void toUpperCase(char* str);
 char* replace(char* str, char* a, char* b);
 char* getVaraibleFormText(char* RegexStr, char* source);

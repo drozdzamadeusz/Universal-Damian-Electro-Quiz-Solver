@@ -38,7 +38,7 @@ typedef struct VariableObject{
 
 
 
-VariableObject* varibleListHead;
+VariableObject* variableListHead;
 
 VariableObject* getLastVariableObject(VariableObject* head);
 
@@ -50,6 +50,6 @@ cJSON* variableObjectToJson(VariableObject* object);
 
 cJSON* variablesObjectsToJsonArray(VariableObject* head);
 
-VariableObject* addVariableObjectToList(short int index, short selectedMode, char* variableName, char* regexInput0, char* regexInput1, char* regex, char* valueFound);
+VariableObject* addVariableObjectToList(short int index, short int selectedMode, char* variableName, char* regexInput0, char* regexInput1, char* regex, char* valueFound);
 
 #endif

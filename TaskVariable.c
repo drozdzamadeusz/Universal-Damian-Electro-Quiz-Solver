@@ -1,6 +1,20 @@
 #include "TaskVariable.h"
 
 
+void freeAllObjects(VariableObject* head){
+	if (!head) {
+		return;
+	}
+	freeAllObjects(head->nextVariable);
+	g_free(head->variableName);
+	g_free(head->regexInput0);
+	g_free(head->regexInput1);
+	g_free(head->generatedRegex);
+	g_free(head->valueFound);
+	g_free(head->nextVariable);
+}
+
+
 VariableObject* getLastVariableObject(VariableObject* head){
 	VariableObject* currentObj = head;
 	while(currentObj->nextVariable){
@@ -11,7 +25,7 @@ VariableObject* getLastVariableObject(VariableObject* head){
 
 
 VariableObject* findVariableObjectByIndex(short int index){
-	VariableObject* searchedObject = varibleListHead;
+	VariableObject* searchedObject = variableListHead;
 	while(searchedObject){
 
 		if(searchedObject->index == index){
@@ -48,7 +62,6 @@ cJSON* variableObjectToJson(VariableObject* object){
 		if(cJSON_AddStringToObject(objectJson, "regexInput1", object->regexInput1) == NULL) goto end;
 		if(cJSON_AddStringToObject(objectJson, "generatedRegex", object->generatedRegex) == NULL) goto end;
 		if(cJSON_AddStringToObject(objectJson, "valueFound", object->valueFound) == NULL) goto end;
-		//if(cJSON_AddNumberToObject(objectJson, "convertedValue", object->convertedValue) == NULL) goto end;
 		if(cJSON_AddNumberToObject(objectJson, "isVaildValue", object->isVaildValue) == NULL) goto end;
     }
 	end:
@@ -80,7 +93,7 @@ cJSON* variablesObjectsToJsonArray(VariableObject* head){
 		return variables;
 }
 
-VariableObject* addVariableObjectToList(short int index, short selectedMode, char* variableName, char* regexInput0, char* regexInput1, char* regex, char* valueFound){
+VariableObject* addVariableObjectToList(short int index, short int selectedMode, char* variableName, char* regexInput0, char* regexInput1, char* regex, char* valueFound){
 	VariableIdentificationMethod identificationMethod = {0};
 	switch(selectedMode){
 		case 0:
@@ -94,7 +107,7 @@ VariableObject* addVariableObjectToList(short int index, short selectedMode, cha
 	}
 
 
-	if(varibleListHead){
+	if(variableListHead){
 		VariableObject* searchedObject = findVariableObjectByIndex(index);
 		if(searchedObject){
 
@@ -114,7 +127,7 @@ VariableObject* addVariableObjectToList(short int index, short selectedMode, cha
 			searchedObject->valueFound = valueFound;
 
 
-			printAllVariableObjects(varibleListHead);
+			//printAllVariableObjects(variableListHead);
 
 			return searchedObject;
 
@@ -131,28 +144,28 @@ VariableObject* addVariableObjectToList(short int index, short selectedMode, cha
 			newVariableObject->valueFound = valueFound;
 			newVariableObject->nextVariable = NULL;
 
-			getLastVariableObject(varibleListHead)->nextVariable = newVariableObject;	
+			getLastVariableObject(variableListHead)->nextVariable = newVariableObject;	
 
-			printAllVariableObjects(varibleListHead);
+			//printAllVariableObjects(variableListHead);
 
 			return newVariableObject;
 		}
 	}else{
-		varibleListHead = (VariableObject *)g_malloc(sizeof(VariableObject));
+		variableListHead = (VariableObject *)g_malloc(sizeof(VariableObject));
 
-		varibleListHead->index = index;
-		varibleListHead->identificationMethod = identificationMethod;
-		varibleListHead->variableName = variableName;
-		varibleListHead->regexInput0 = regexInput0;
-		varibleListHead->regexInput1 = regexInput1;
-		//varibleListHead->taskContent = taskContent;
-		varibleListHead->generatedRegex = regex;
-		varibleListHead->valueFound = valueFound;
-		varibleListHead->nextVariable = NULL;
+		variableListHead->index = index;
+		variableListHead->identificationMethod = identificationMethod;
+		variableListHead->variableName = variableName;
+		variableListHead->regexInput0 = regexInput0;
+		variableListHead->regexInput1 = regexInput1;
+		//variableListHead->taskContent = taskContent;
+		variableListHead->generatedRegex = regex;
+		variableListHead->valueFound = valueFound;
+		variableListHead->nextVariable = NULL;
 
-		printAllVariableObjects(varibleListHead);
+		//printAllVariableObjects(variableListHead);
 
-		return varibleListHead;
+		return variableListHead;
 	}
 
 	return NULL;

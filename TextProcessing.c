@@ -1,5 +1,11 @@
 #include "TextProcessing.h"
 
+char* getContentSlug(char* content){
+	char* contentSlug =  preg_replace("[^a-zA-Z]", "", content);
+    toUpperCase(contentSlug);
+    return contentSlug;
+}
+
 void toUpperCase(char* str) {
    int c = 0;
    
@@ -43,7 +49,7 @@ char* getVaraibleFormText(char* RegexStr, char* source){
 	subject_length = strlen((char *)subject);
 
 
-	g_print("\n%s", RegexStr);
+	//g_print("\n%s", RegexStr);
 
 	//char *result = NULL;
 	char *result = strdup("");
@@ -125,6 +131,8 @@ char* getVaraibleFormText(char* RegexStr, char* source){
 	  substring_start = subject + ovector[0];
 		size_t substring_length = ovector[1] - ovector[0];
 
+
+		free(result);
         result = g_malloc((int)substring_length*2+10);
 		sprintf(result,"%.*s\n",(int)substring_length, (char *)substring_start);
 
