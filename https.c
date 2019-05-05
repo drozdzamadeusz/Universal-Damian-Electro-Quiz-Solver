@@ -897,6 +897,8 @@ int http_post(HTTP_INFO *hi, char *url, char *data, char *response, int size)
             "Accept: */*\r\n"
             "Content-Type: application/json; charset=utf-8\r\n"
             "Content-Length: %d\r\n"
+            "Authentication-User: analprolapse\r\n"
+            "Authentication-Key: DA616295D6D15B2875E83010016B53E6EAD269D77148F7609B98D7A1F77F55431A429A271759AB27C61E36CF8259B047CFEA2B55D2A8FFEF854A4B6BFA06ACC8\r\n"
             "%s\r\n"
             "%s",
             dir, host, port,

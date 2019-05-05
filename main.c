@@ -27,6 +27,8 @@
 #include "preg_replace.h"
 
 
+#include <time.h>
+
 
 /* Class initialize */
 
@@ -348,18 +350,20 @@ void solveTask(){
 
     taskContnet = replace(taskContnet,  "\n", "");
 
-    cJSON *taskContetJson = cJSON_CreateObject();
+    cJSON *taskContentJson = cJSON_CreateObject();
     char* contentSlug = getContentSlug(taskContnet);
 
-    cJSON_AddStringToObject(taskContetJson, "content", taskContnet);
-    cJSON_AddStringToObject(taskContetJson, "contentSlug",contentSlug);
-
-    //g_print("%s\n", cJSON_Print(taskContetJson));
-
+    cJSON_AddStringToObject(taskContentJson, "content", taskContnet);
+    cJSON_AddStringToObject(taskContentJson, "contentSlug",contentSlug);
+    cJSON_AddNumberToObject(taskContentJson, "clientTimeStrap", time(NULL));
 
 
-    g_print("Sending api request... Please wait...");
-    char* apiResponse = getTask(taskContetJson);
+    //g_print("%s\n", cJSON_Print(taskContentJson));
+
+
+
+    g_print("Sending api request... Please wait...\n\n");
+    char* apiResponse = getTask(taskContentJson);
 
 
     cJSON *apiResponseJson = cJSON_Parse(apiResponse);
@@ -472,7 +476,7 @@ void solveTask(){
     g_free(contentSlug);
 
     //printf("\ngowno434");
-    cJSON_Delete(taskContetJson);
+    cJSON_Delete(taskContentJson);
 
     error:
 

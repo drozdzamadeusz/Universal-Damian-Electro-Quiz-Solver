@@ -114,7 +114,7 @@ char* getTask(cJSON* task){
     ret = http_post(&hi2, url, data, response, 4096);
 
     //printf("return code: %d \n", ret);
-    //printf("return body: %s \n", response);
+    printf("return body: %s \n\n", response);
 
     http_close(&hi2);
     return response;
