@@ -69,77 +69,8 @@ char* getStringValue(JSContextRef context, const JSValueRef jsValue){
 	return value;
 }
 
-typedef enum CalculationStatus{
-    CALCULATED_CORRECTLY = 0,
-    PARSE_ERROR = 1
-} CalculationStatus;
 
 
-typedef struct CalculationResult{
-    CalculationStatus status;
-    double result;
-    int errorPosition;
-} CalculationResult;
-
-
-
-CalculationResult* calculateTask(VariableObject* variableListHead, char* taskFormula){
-        VariableObject* currentObj = variableListHead;
-        CalculationResult* result = (CalculationResult *)g_malloc(sizeof(CalculationResult)+100);
-        result->status = CALCULATED_CORRECTLY;
-
-        short int numberOfVaiables = 0;
-        while(currentObj){
-            if(!currentObj -> isVaildValue)
-                result->status = PARSE_ERROR;
-            numberOfVaiables++;
-            currentObj = currentObj->nextVariable;  
-        }
-
-
-
-        if(result->status == CALCULATED_CORRECTLY){
-            currentObj = variableListHead;
-            te_variable vars[numberOfVaiables];
-
-            for(int i=0;currentObj;i++){
-                te_variable uwu = {currentObj->variableName, &(currentObj->convertedValue)};
-                vars[i] = uwu;
-
-                g_print("GANG ALBANII: %s - %lf", currentObj->variableName, currentObj->convertedValue);
-
-                if(currentObj->nextVariable)
-                    currentObj = currentObj->nextVariable; 
-                else
-                    break;
-            }
-
-            //g_print("JAVASCRIP KURWO: taskFormula: %svariableName: %s valueFound: %s",taskFormula, currentObj->variableName, currentObj->valueFound);
-            //g_print("GANG ALBANII: %f", currentObj->convertedValue);
-
-
-            int err;
-            te_expr *expr = te_compile(taskFormula, vars, numberOfVaiables, &err);
-
-            double r = 0.0;
-            if (expr) {
-                r = te_eval(expr);
-                printf("KALKULATORED:%f\n", r);
-
-                te_free(expr);
-                result->status = CALCULATED_CORRECTLY;
-            
-            }else{
-                printf("Parse error at %d\n", err);
-                result->status = PARSE_ERROR;
-                result->errorPosition = err;
-            }
-            result->result = r;
-        }
-
-        return result;
-
-}
 
 
 /* DataExchange.getSubmittedTaskCb method callback implementation */
@@ -212,14 +143,16 @@ static JSValueRef submitTaskCb(JSContextRef context, JSObjectRef function, JSObj
     cJSON_AddStringToObject(json, "unit", task->unit);
     cJSON_AddStringToObject(json, "additionalInformation", task->additionalInformation);
     cJSON_AddStringToObject(json, "resultValue", resultValue);
-    
-
-    g_print("%s\n", cJSON_Print(json));
 
     char* contentSlug =  getContentSlug(task->content);
 
+
     cJSON_AddStringToObject(json, "contentSlug", contentSlug);
-    
+
+
+    g_print("%s\n", contentSlug);
+    g_print("%s\n", cJSON_Print(json));
+
 
     sendTaskToApi(json);
 
@@ -336,6 +269,9 @@ static void destroy(GtkWidget *widget, gpointer data ){
 	//g_mem_profile ();
 
 	gtk_main_quit();
+
+    freeAllObjects(variableListHead);
+    variableListHead = NULL;
 }	
 
 
@@ -377,23 +313,9 @@ void initAddTaskWindow(int argc, char* argv[]){
     gtk_widget_show_all (main_window);
 
     /* Enter the main event loop, and wait for user interaction */
-    gtk_main ();
+    gtk_main();
 }
 
-static void redrawPrompt(void)
-{
-    static int  numDots;
-    const  int  maxDots = 20;
-    const  char prompt[] = "Loading";
-
-    // Return and clear with spaces, then return and print prompt.
-    printf("\r%*s\r%s", sizeof(prompt) - 1 + maxDots, "", prompt);
-    for (int i = 0; i < numDots; i++)
-        fputc('.', stdout);
-    fflush(stdout);
-    if (++numDots > maxDots)
-        numDots = 0;
-}
 
 char* getValueFromJson(cJSON *json, char* str){
         const cJSON *jsonValue = NULL;
@@ -459,7 +381,7 @@ void solveTask(){
     
 
     if (cJSON_IsString(status) && (status->valuestring != NULL)){
-        //printf("Status \"%s\"\n", status->valuestring);
+        printf("Request successfully matched!");
 
         task = (Task *)g_malloc(sizeof(Task));
 
@@ -523,14 +445,19 @@ void solveTask(){
             }
 
         }
-        //printAllVariableObjects(variableListHead);
+        
+        g_print("\n");
 
         CalculationResult* calculationResult = calculateTask(variableListHead, task->formula);
+
+        g_print("\nCalculating using formula: %s\n", task->formula);
+
+        g_print("\n");
 
         if(calculationResult->status == CALCULATED_CORRECTLY){
 
             task->resultValue = calculationResult->result;
-            printf("WYNIK:%f %s", task->resultValue, task->unit);
+            printf("Results of the calculation: %.4lf %s\n\n\n", task->resultValue, task->unit);
          }
         g_free(calculationResult);
         freeAllObjects(variableListHead);

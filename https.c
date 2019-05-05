@@ -831,7 +831,7 @@ int http_get(HTTP_INFO *hi, char *url, char *response, int size)
 /*---------------------------------------------------------------------*/
 int http_post(HTTP_INFO *hi, char *url, char *data, char *response, int size)
 {
-    char        request[1024], err[100];
+    char        request[65536], err[100];
     char        host[256], port[10], dir[1024];
     int         sock_fd, https, verify;
     int         ret, opt, len;
@@ -889,7 +889,7 @@ int http_post(HTTP_INFO *hi, char *url, char *data, char *response, int size)
     }
 
     /* Send HTTP request. */
-    len = snprintf(request, 1024,
+    len = snprintf(request, 65536,
             "POST %s HTTP/1.1\r\n"
             "User-Agent: Mozilla/4.0\r\n"
             "Host: %s:%s\r\n"
@@ -915,7 +915,7 @@ int http_post(HTTP_INFO *hi, char *url, char *data, char *response, int size)
         return -1;
     }
 
-//  printf("request: %s \r\n\r\n", request);
+    printf("request: %s \r\n\r\n", request);
 
     hi->response.status = 0;
     hi->response.content_length = 0;

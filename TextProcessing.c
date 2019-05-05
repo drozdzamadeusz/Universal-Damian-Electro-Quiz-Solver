@@ -111,7 +111,7 @@ char* getVaraibleFormText(char* RegexStr, char* source){
 	PCRE2_SPTR substring_start;
 	if (Debug){
 	ovector = pcre2_get_ovector_pointer(match_data);
-	printf("Match succeeded at offset %d\n", (int)ovector[0]);
+	//printf("Match succeeded at offset %d\n", (int)ovector[0]);
 
 	if (rc == 0)
 	  printf("ovector was not big enough for all the captured substrings\n");
