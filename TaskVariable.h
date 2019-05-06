@@ -36,13 +36,13 @@ typedef struct VariableObject{
 	struct VariableObject* nextVariable;
 } VariableObject;
 
-
-
 VariableObject* variableListHead;
+
+void freeAllVariables(VariableObject* head);
 
 VariableObject* getLastVariableObject(VariableObject* head);
 
-VariableObject* findVariableObjectByIndex(short int index);
+VariableObject* findVariableObjectByIndex(VariableObject* head, short int index);
 
 void printAllVariableObjects(VariableObject* head);
 

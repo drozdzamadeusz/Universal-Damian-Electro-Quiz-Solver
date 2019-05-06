@@ -1,11 +1,11 @@
 #include "TaskVariable.h"
 
 
-void freeAllObjects(VariableObject* head){
+void freeAllVariables(VariableObject* head){
 	if (!head) {
 		return;
 	}
-	freeAllObjects(head->nextVariable);
+	freeAllVariables(head->nextVariable);
 	g_free(head->variableName);
 	g_free(head->regexInput0);
 	g_free(head->regexInput1);
@@ -24,8 +24,8 @@ VariableObject* getLastVariableObject(VariableObject* head){
 }
 
 
-VariableObject* findVariableObjectByIndex(short int index){
-	VariableObject* searchedObject = variableListHead;
+VariableObject* findVariableObjectByIndex(VariableObject* head, short int index){
+	VariableObject* searchedObject = head;
 	while(searchedObject){
 
 		if(searchedObject->index == index){
@@ -108,7 +108,7 @@ VariableObject* addVariableObjectToList(short int index, short int selectedMode,
 
 
 	if(variableListHead){
-		VariableObject* searchedObject = findVariableObjectByIndex(index);
+		VariableObject* searchedObject = findVariableObjectByIndex(variableListHead, index);
 		if(searchedObject){
 
 			g_free(searchedObject->variableName);
@@ -126,8 +126,8 @@ VariableObject* addVariableObjectToList(short int index, short int selectedMode,
 			searchedObject->generatedRegex = regex;
 			searchedObject->valueFound = valueFound;
 
-
-			//printAllVariableObjects(variableListHead);
+			printf("UPDATER\n");
+			printAllVariableObjects(variableListHead);
 
 			return searchedObject;
 
@@ -146,7 +146,9 @@ VariableObject* addVariableObjectToList(short int index, short int selectedMode,
 
 			getLastVariableObject(variableListHead)->nextVariable = newVariableObject;	
 
-			//printAllVariableObjects(variableListHead);
+			printf("DODWANIE\n");
+
+			printAllVariableObjects(variableListHead);
 
 			return newVariableObject;
 		}
@@ -158,12 +160,13 @@ VariableObject* addVariableObjectToList(short int index, short int selectedMode,
 		variableListHead->variableName = variableName;
 		variableListHead->regexInput0 = regexInput0;
 		variableListHead->regexInput1 = regexInput1;
-		//variableListHead->taskContent = taskContent;
 		variableListHead->generatedRegex = regex;
 		variableListHead->valueFound = valueFound;
 		variableListHead->nextVariable = NULL;
 
-		//printAllVariableObjects(variableListHead);
+		printf("PIERWSZY\n");
+
+		printAllVariableObjects(variableListHead);
 
 		return variableListHead;
 	}
