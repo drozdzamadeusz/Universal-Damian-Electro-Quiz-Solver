@@ -45,7 +45,7 @@ CalculationResult* calculateTask(VariableObject* variableListHead, char* taskFor
                 te_variable uwu = {currentObj->variableName, &(currentObj->convertedValue)};
                 vars[i] = uwu;
 
-                g_print("\nVaraible match succeeded: %s - %.4lf", currentObj->variableName, currentObj->convertedValue);
+                //g_print("\nVaraible match succeeded: %s - %.4lf", currentObj->variableName, currentObj->convertedValue);
 
                 if(currentObj->nextVariable)
                     currentObj = currentObj->nextVariable; 

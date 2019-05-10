@@ -127,7 +127,7 @@ VariableObject* addVariableObjectToList(short int index, short int selectedMode,
 			searchedObject->valueFound = valueFound;
 
 			printf("UPDATER\n");
-			printAllVariableObjects(variableListHead);
+			//printAllVariableObjects(variableListHead);
 
 			return searchedObject;
 
@@ -148,7 +148,7 @@ VariableObject* addVariableObjectToList(short int index, short int selectedMode,
 
 			printf("DODWANIE\n");
 
-			printAllVariableObjects(variableListHead);
+			//printAllVariableObjects(variableListHead);
 
 			return newVariableObject;
 		}
@@ -166,7 +166,7 @@ VariableObject* addVariableObjectToList(short int index, short int selectedMode,
 
 		printf("PIERWSZY\n");
 
-		printAllVariableObjects(variableListHead);
+		//printAllVariableObjects(variableListHead);
 
 		return variableListHead;
 	}

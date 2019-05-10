@@ -917,7 +917,7 @@ int http_post(HTTP_INFO *hi, char *url, char *data, char *response, int size)
         return -1;
     }
 
-    printf("request: %s \r\n\r\n", request);
+    //printf("request: %s \r\n\r\n", request);
 
     hi->response.status = 0;
     hi->response.content_length = 0;

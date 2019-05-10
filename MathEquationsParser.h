@@ -24,7 +24,6 @@
 #include "TextProcessing.h"
 #include "MathEquationsParser.h"
 #include "ApiService.h"
-#include "Memd/mem.h"
 #include "preg_replace.h"
 
 typedef enum CalculationStatus{

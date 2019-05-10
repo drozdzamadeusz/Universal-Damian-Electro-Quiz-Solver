@@ -25,18 +25,26 @@
 #include "TextProcessing.h"
 #include "MathEquationsParser.h"
 #include "ApiService.h"
-#include "Memd/mem.h"
+//#include "Memd/mem.h"
 #include "preg_replace.h"
 #include "JsonHelper.h"
 #include "AddTaskWindow.h"
 #include "MainMenu.h"
 
 
+#define DISABLE_PRINTF
 
+#ifdef DISABLE_PRINTF
+    #define printf(fmt, ...) (0)
+#endif
  
 main(int argc, char* argv[]){
 
-showMainMenu(argc, argv);
+
+
+    showMainMenu(argc, argv);
+
+    //fclose(stdout);
 
 /*
   char choice=0;

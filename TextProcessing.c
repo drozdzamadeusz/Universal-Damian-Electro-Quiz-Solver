@@ -68,8 +68,8 @@ char* getVaraibleFormText(char* RegexStr, char* source){
 	if (re == NULL)
 	  {
 	  PCRE2_UCHAR buffer[256];
-	  pcre2_get_error_message(errornumber, buffer, sizeof(buffer));
-	  printf("PCRE2 compilation failed at offset %d: %s\n", (int)erroroffset,buffer);
+	  //pcre2_get_error_message(errornumber, buffer, sizeof(buffer));
+	 // printf("PCRE2 compilation failed at offset %d: %s\n", (int)erroroffset,buffer);
 	  return result;
 	  }
 
@@ -119,9 +119,7 @@ char* getVaraibleFormText(char* RegexStr, char* source){
 
 	if (ovector[0] > ovector[1])
 	  {
-	  printf("\\K was used in an assertion to set the match start after its end.\n"
-	    "From end to start the match was: %.*s\n", (int)(ovector[0] - ovector[1]),
-	      (char *)(subject + ovector[1]));
+	  printf("\\K was used in an assertion to set the match start after its end.\n From end to start the match was: %.*s\n", (int)(ovector[0] - ovector[1]), (char *)(subject + ovector[1]));
 	  printf("Run abandoned\n");
 	  pcre2_match_data_free(match_data);
 	  pcre2_code_free(re);
