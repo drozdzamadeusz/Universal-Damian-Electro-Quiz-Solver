@@ -1,0 +1,10 @@
+[Desktop Entry]
+Version=0_B03
+Name=Universal Electro Quiz Solver    
+Comment=Universal Electro Quiz Solver
+Exec=/home/amadeusz/Desktop/projekto/main %f
+Terminal=true
+Type=Application
+Categories=Utility;Application;
+
+Name[en_US]=projecto.desktop

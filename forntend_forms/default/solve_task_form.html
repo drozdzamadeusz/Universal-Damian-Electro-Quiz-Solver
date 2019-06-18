@@ -1,0 +1,213 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset='utf-8'>
+    <title>Terminal Emulator</title>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+    <link rel="stylesheet" href="assets_files/css/theme.css" type="text/css">
+    <link rel='stylesheet' href='assets_files/css/normalize.css'>
+    <link rel='stylesheet' href='assets_files/css/main.css'>
+    <script src="assets_files/jquery-3.js"></script>
+
+    <link href="assets_files/fontawesome-free-5.8.1-web/css/all.css" rel="stylesheet">
+    <script>
+        window.MathJax = {
+            "fast-preview": {
+                disabled: true
+            },
+            AuthorInit: function() {
+                MathJax.Hub.Register.StartupHook('End', function() {
+                    MathJax.Hub.processSectionDelay = 0
+                    MathJax.Hub.setRenderer("SVG")
+                        //var demoSource = document.getElementById('task-formula-input')
+                        //var demoRendering = document.getElementById('task-formula-rendering')
+                        //MathJax.Hub.getAllJax('task-formula-rendering')[0]
+                })
+
+            }
+        }
+    </script>
+
+    <script src="assets_files/latest.js?config=AM_CHTML"></script>
+
+    <style>
+        html {
+            line-height: 1.35;
+        }
+        
+        .task-formula-rendering {
+            margin: 0.6rem 0;
+            padding: 0.2rem;
+        }
+        /*
+.bg-var-04 {
+  color: #a2aa6f !important; }
+
+.bg-var-00 {
+  color: #a7c1e8 !important; }
+
+.bg-var-01 {
+  color: #ffcccc !important; }
+
+.bg-var-03 {
+  color: #b1c7f9 !important; }
+
+.bg-var-02 {
+  color: #91d6b1 !important; }*/
+        
+        strong {
+            font-weight: 700;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!--<div id="task-formula-rendering" class="task-formula-rendering">`s`</div>-->
+
+    <div class="header-output"><strong>Enter task to solve and press the Enter key to try to solve the task</strong></div>
+    <div class="header-output"><strong>Supported commands:</strong></div>
+    <div class="header-output" style="padding-left:2em"><strong>clear</strong> - removes all tasks from the console</div>
+    <!--<div class="header-output" style="padding-left:2em"><strong>history</strong> - shows the history of solved tasks</div>
+	<div class="header-output" style="padding-left:2em"><strong>Arrow Up/Down Key</strong> - show the previous and next task in history</div>-->
+    <div class="header-output">
+        <br />
+    </div>
+    <div id='output-wrapper'></div>
+
+    <div class='input-wrapper'>
+        <span>Enter your task&gt;&nbsp;</span>
+        <textarea rows="4" cols="67" id="input" autofocus></textarea>
+    </div>
+
+    <script>
+        outputAddon = "Result&gt;";
+        inputAddon = "Enter your task&gt;";
+        taskNotFound = "<span class=\"error-output\">Task not found!</span>";
+        $input = $("#input");
+
+        function moveCursorToEnd(input) {
+            var originalValue = input.val();
+            input.val('');
+            input.blur().focus().val(originalValue);
+        }
+
+        function solveTask() {
+            var $outputWrapper = $("#output-wrapper");
+            var inputVal = $input.val();
+
+            if (inputVal == "clear") {
+                $("#output-wrapper").html('');
+            } else {
+                $outputWrapper.append('<div class="header-output">' + inputAddon + ' ' + inputVal + "</div>");
+
+                var result = SolveTaskDataExchange.solveTask(inputVal);
+                var json = JSON.parse(result);
+                if (json.status == "taskFound") {
+                    $outputWrapper.append('<div class="text-output">' + outputAddon + ' Task recognized successfully!</div>');
+
+                    for (var i = 0; i < json.variables.length; i++) {
+                        var variable = json.variables[i];
+                        //bg-var-0'+i+'
+                        var output = ('<div class="text-output">' + variable.variableName + ' variable found ');
+                        switch (variable.identificationMethod) {
+                            case 0:
+                                output += ("(number limited by \"" + variable.regexInput0 + "\" and \"" + variable.regexInput1 + "\"): ");
+                                break;
+                            case 1:
+                                output += ("(number after \"" + variable.regexInput0 + "\"): ");
+                                break;
+                            case 2:
+                                output += ("(custom regex: \"" + variable.regexInput0 + "\"): ");
+                                break;
+                        }
+                        output += (variable.valueFound + '</div>');
+                        $outputWrapper.append(output);
+
+                    }
+
+                    $outputWrapper.append('<div class="text-output">Applying formula: <div id="task-formula-rendering" class="task-formula-rendering">`' + json.formula + '`</div></div>');
+
+                    if (json.additionalInformation != "") {
+                        $outputWrapper.append('<div class="text-output">Additional information&gt; <strong>' + json.additionalInformation + '</strong></div>');
+                    }
+
+                    $outputWrapper.append('<div class="text-output">' + outputAddon + ' <strong>' + json.resultValue + json.unit + '</strong></div>');
+
+                } else {
+                    $outputWrapper.append('<div class="text-output">' + outputAddon + ' ' + taskNotFound + '</div>');
+                }
+            }
+
+            //MathJax.Hub.getAllJax('task-formula-rendering')[0]
+
+            //var childrenCount = document.getElementById("task-formula-rendering").childNodes.length;
+            //document.getElementById("task-formula-rendering").childNodes[childrenCount-1];
+
+            //var math = document.querySelectorAll("#task-formula-rendering");
+
+            //var math = document.getElementById("task-formula-rendering");
+            //MathJax.Hub.Queue(["Typeset",MathJax.Hub,math]);
+
+            /*$( ".task-formula-rendering" ).each(function( index ) {
+              var math =  $(this);
+            	MathJax.Hub.Queue(["Typeset",MathJax.Hub,math]);
+            });*/
+
+            var x = document.getElementsByClassName("task-formula-rendering");
+            var i;
+            for (i = 0; i < x.length; i++) {
+                var math = x[i];
+                MathJax.Hub.Queue(["Typeset", MathJax.Hub, math]);
+            }
+
+            $input.val('');
+
+            $('html, body').scrollTop($(document).height());
+            setTimeout(function() {
+                $('html, body').scrollTop($(document).height());
+            }, 1000);
+            return;
+
+        }
+
+        $('textarea').on('keydown', function(e) {
+            if (e.which == 13) {
+                e.preventDefault();
+                solveTask();
+            }
+        }).on('input', function() {
+            $(this).height(1);
+            var totalHeight = $(this).prop('scrollHeight') - parseInt($(this).css('padding-top')) - parseInt($(this).css('padding-bottom'));
+            $(this).height(totalHeight);
+        });
+
+        $(document).keypress(function(event) {
+
+            var keycode = (event.keyCode ? event.keyCode : event.which);
+            if (keycode == '13') {
+                solveTask();
+            }
+
+            if (event.ctrlKey) {
+                $input.focus();
+            }
+
+        });
+
+        $(document).click(function(e) {
+            //moveCursorToEnd($("#input"));
+        });
+
+        /*$(document).keydown(function(e) {
+        	if (ctrlDown && (e.keyCode == vKey)){
+        		$input.val("")
+        	}
+        });*/
+    </script>
+    <script>selected_mode = "solve_task"</script>
+    <script type="text/javascript" src="assets_files/updater.js"></script>
+</body>
+
+</html>

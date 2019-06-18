@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="assets_files/jquery-3.js"></script>
+  <link href="assets_files/fontawesome-free-5.8.1-web/css/all.css" rel="stylesheet">
+  <link rel="stylesheet" href="assets_files/bootstrap-select.css">
+  <script src="assets_files/bootstrap-select.js"></script>
+  <script src="assets_files/jquery.js"></script>
+  <link href="assets_files/jquery.css" rel="stylesheet">
+  <link rel="stylesheet" href="assets_files/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
+  <link rel="stylesheet" href="assets_files/css/theme.css" type="text/css">
+  <script> window.MathJax = {
+            "fast-preview": {
+                disabled: true
+            },
+            AuthorInit: function() {
+                MathJax.Hub.Register.StartupHook('End', function() {
+                    MathJax.Hub.processSectionDelay = 0
+                    MathJax.Hub.setRenderer("HTML-CSS")
+                    var demoSource = document.getElementById('task-formula-input')
+                    var demoRendering = document.getElementById('task-formula-rendering')
+                    var math = MathJax.Hub.getAllJax('task-formula-rendering')[0]
+                    demoSource.addEventListener('input', function() {
+                        MathJax.Hub.Queue(['Text', math, demoSource.value])
+                    })
+                })
+
+            }
+        }
+
+        function isNumeric(n) {
+            n = n.replace(",", ".")
+            return !isNaN(parseFloat(n)) && isFinite(n);
+        }
+
+        function escapeRegExp(string) {
+            return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
+        }
+
+        jQuery(function($){
+
+            $('textarea').on('keydown', function(e) {
+                if (e.which == 13) {
+                    e.preventDefault();
+                }
+            }).on('input', function() {
+                $(this).height(1);
+                var totalHeight = $(this).prop('scrollHeight') - parseInt($(this).css('padding-top')) - parseInt($(this).css('padding-bottom'));
+                $(this).height(totalHeight);
+            });
+
+            index = 0;
+
+            function expressionHighlightError(show){
+                if(show){
+                  $(".task-alert").html("<i class=\"fas fa-exclamation-triangle\"></i> Some expressions cannot be marked by highlighting");
+                  $(".task-alert").show();
+                }else{
+                  $(".task-alert").hide();
+                }
+            }
+
+
+            successResult = false;
+
+            function sendForm(){
+                var task = $('.task-input').val();
+                var taskVriablesRegister = $('.task-variables-register-input').val();
+                var taskFormula = $('.task-formula-input').val();
+                var taskUnit = $('.task-unit-input').val();
+                var taskAdditionalInformation = $('.task-additional-information-input').val();
+
+                var result = DataExchange.validateTask(task, taskVriablesRegister, taskFormula, taskUnit, taskAdditionalInformation);
+
+                if(result != undefined){
+                    $('.main-status-label').html('<div class="badge badge-pill badge-success" role="success"><i class="fas fa-check-circle"></i> '+result+'</div>'); 
+                	successResult = true;
+                }else{
+                    $('.main-status-label').html('<div class="badge badge-pill badge-warning" role="warning"><i class="fas fa-exclamation-triangle"></i> Formula parse error</div>');
+                    successResult = false;        
+                }
+            }
+
+
+            function registerVariableObject($variableObject) {
+
+                var index = $variableObject.attr("data-index");
+                var regexInput0 = $variableObject.find('.variable-regex-i0-input').val();
+                var regexInput1 = $variableObject.find('.variable-regex-i1-input').val();
+                var variableName = $variableObject.attr('data-varaiable');
+                var selectedMode = $variableObject.find('option:selected').val();
+
+                var task = $('.task-input').val();
+
+                if (regexInput0 != "") {
+                    if (selectedMode != 2) {
+                        regexInput0 = escapeRegExp(regexInput0);
+                        regexInput1 = escapeRegExp(regexInput1);
+                    } else {
+                        //$(".task-alert").html("<i class=\"fas fa-exclamation-triangle\"></i> Some expressions are not supported by on the fly text highlight");
+                        //$(".task-alert").show();
+                    }
+                    var result = DataExchange.findVariable(index, selectedMode, variableName, regexInput0, regexInput1, task);
+                    var text = "";
+                    $variableObject.find(".variable-status-text").find("b").addClass("text-danger");
+                    $variableObject.find(".variable-status-text").find("b").removeClass("text-success");
+                    if (result != "" && result != undefined) {
+                        if (!isNumeric(result)) {
+                            $variableObject.find(".variable-status-text").find("b").html("Value not numeric! (" + result + ")");
+                            return;
+                        }
+                        $variableObject.find(".variable-status-text").find("b").html("Variable found: " + result);
+                        $variableObject.find(".variable-status-text").find("b").addClass("text-success");
+                        $variableObject.find(".variable-status-text").find("b").removeClass("text-danger");
+
+                        if (selectedMode == 0) {
+                            text = $variableObject.find('.variable-regex-i0-input').val() + result + $variableObject.find('.variable-regex-i1-input').val();
+                        } else if (selectedMode == 1) {
+                            text = $variableObject.find('.variable-regex-i0-input').val() + result;
+                        }
+
+                        text = text.replace(/(\r\n|\n|\r)/gm, "");
+                    } else {
+                        $variableObject.find(".variable-status-text").find("b").html("Variable not found!");
+                    }
+                    $variableObject.attr('data-highlight', text);
+                }
+            }
+
+            function highlightTask() {
+
+                if (!$('.task-input').is(':focus')) {
+
+                    highlightList = "";
+                    $('.task-input').highlightTextarea('destroy');
+
+                    selectedMode = 0;
+
+                    $('.variable-form').each(function(i, o) {
+                        if ($(this).find('option:selected').val() == 2)
+                            selectedMode = 2;
+
+                        var highlightText = $(this).attr('data-highlight');
+                        if (highlightText != "") {
+                            if (highlightList == "") {
+                                highlightList = [highlightText];
+                            } else {
+                                highlightList.push(highlightText);
+                            }
+                            //highlightList.push(highlightText.replace(",", "."));
+                        }
+                    });
+
+                    if (highlightList != undefined) {
+                        try {
+                            expressionHighlightError((selectedMode != 2)?false:true);
+                            $(this).find(".variable-regex-alert").hide();
+                            $('.task-input').highlightTextarea({
+                                words: highlightList,
+                                id: 'task-input',
+                                resizable: true
+                            });
+                        } catch (error) {
+                          expressionHighlightError(true);
+                        }
+                    }
+
+                    if ($(".highlightTextarea-highlighter mark").length < highlightList.length) {
+                      expressionHighlightError(true);
+                    } else {
+                        if (selectedMode != 2) expressionHighlightError(false);
+                    }
+
+                }
+
+                $('.variable-form').each(function(i, o) {
+                    var highlightText = $(this).attr('data-highlight');
+                    if (highlightText != "") {
+                        $("mark:contains('" + highlightText + "')").addClass("bg-var-0" + $(this).data("index"));
+                        $("mark:contains('" + highlightText.replace(",", ".") + "')").addClass("bg-var-0" + $(this).data("index"));  
+                        //$("mark:contains('" + escapeRegExp(highlightText)+ "')").addClass("bg-var-0" + $(this).data("index"));    
+                    }
+                });
+
+            }
+
+            //setInterval(highlightTask, 3000);
+
+            $('.task-input').focus(function() {
+                $("mark").hide();
+            });
+
+            $('.task-input').blur(function() {
+                $("mark").show();
+                highlightTask();
+            });
+
+            function recheckAllVaraiables() {
+                $('.task-input').on('input', function() {
+                    $('.variable-form').each(function(i, o) {
+                        registerVariableObject($(this));
+                    });
+                    sendForm();
+                });
+                highlightTask();
+            }
+
+            function appendVaraiable(i, v) {
+                var varaiableHtml = '\
+                  <div class="variable-form col-12 px-0 p-2 bg-var-0' + i + ' mb-2" data-index="' + i + '" data-varaiable="' + v + '" data-highlight="">\
+                    <div class="w-100"> <label class="variable-header-text">Variable identification</label>\
+                      <div class="row">\
+                        <div class="px-1 col-sm-4 col-3">\
+                          <h3 class="text-right variable-header-equals-text overflow-auto"><b>' + v + '=</b></h3>\
+                        </div>\
+                        <div class="col-sm-4 col-6 variable-select">\
+                          <select class="selectpicker variable-regex-select" data-width="100%" data-index="' + i + '" name="variable-regex-select[]">\
+                            <option value="1">Number after pharse</option>\
+                            <option value="0">Number between phrases</option>\
+                            <option value="2">Custom regex expression</option>\
+                          </select>\
+                        </div>\
+                        <div class="col-sm-4 col-3 px-1 pr-2">\
+                          <h6 class="text-uppercase text-left m-0 shadow-none variable-status-text overflow-auto"><b class="text-danger">Variable not found!</b></h6>\
+                        </div>\
+                      </div>\
+                      <div class="row variable-regex-inputs-form">\
+                        <div class="col-md-12">\
+                          <div class="row">\
+                            <div class="col-6 variable-regex-l0-label"><label>Text before variable</label></div>\
+                            <div class="col-6 variable-regex-l1-label"><label>Text after variable</label></div>\
+                          </div>\
+                          <div class="row py-0">\
+                            <div class="my-0 py-0 col-6 variable-regex-i0-container">\
+                              <div class="form-group row my-0">\
+                          <div class="col-12"><input type="text" class="form-control variable-regex-i0-input variable-regex-input" placeholder="" data-index="' + i + '" name="variable-regex-i0-input[]">\
+                          </div>\
+                              </div>\
+                            </div>\
+                            <div class="my-0 py-0 col-6 variable-regex-i1-container">\
+                              <div class="form-group row my-0">\
+                          <div class="col-12"><input type="text" class="form-control variable-regex-i1-input variable-regex-input" placeholder="" data-index="' + i + '" name="variable-regex-i1-input[]"></div>\
+                              </div>\
+                            </div>\
+                          </div>\
+                        </div>\
+                      </div>\
+                    </div>\
+                 </div>';
+                $('.variable-forms-container').append(varaiableHtml);
+                $('.variable-regex-select').selectpicker();
+                $('.variable-regex-select').change(function() {
+                    variableAddingMode($(this).attr("data-index"), $(this).find("option:selected").val());
+                    recheckAllVaraiables();
+                });
+                variableAddingMode(i, 1);
+                recheckAllVaraiables();
+                $('.variable-regex-input').on('input', function() {
+                    $variableObject = $('div.variable-form[data-index=' + $(this).attr("data-index") + ']');
+                    registerVariableObject($variableObject);
+                    highlightTask();
+                    sendForm();
+                });
+
+            }
+
+            recheckAllVaraiables();
+
+            function variableAddingMode(i, v) {
+                $s = $('.variable-form[data-index=' + i + ']');
+                if (v == 0) {
+                    $s.find(".variable-regex-l0-label label").html("Text before variable");
+                    $s.find(".variable-regex-l1-label").show();
+                    $s.find(".variable-regex-l0-label").removeClass("col-12");
+                    $s.find(".variable-regex-l0-label").addClass("col-6");
+
+                    $s.find(".variable-regex-i1-container").show();
+                    $s.find(".variable-regex-i0-container").removeClass("col-12");
+                    $s.find(".variable-regex-i0-container").addClass("col-6");
+                } else if (v == 1) {
+                    $s.find(".variable-regex-l0-label label").html("Text before variable");
+                    $s.find(".variable-regex-l1-label").hide();
+                    $s.find(".variable-regex-l0-label").removeClass("col-6");
+                    $s.find(".variable-regex-l0-label").addClass("col-12");
+
+                    $s.find(".variable-regex-i1-container").hide();
+                    $s.find(".variable-regex-i0-container").removeClass("col-6");
+                    $s.find(".variable-regex-i0-container").addClass("col-12");
+                } else if (v == 2) {
+                    $s.find(".variable-regex-l0-label label").html("Advanced users only<br />Enter custom regex (PCRE2 10 standard)");
+                    $s.find(".variable-regex-l1-label").hide();
+                    $s.find(".variable-regex-l0-label").removeClass("col-6");
+                    $s.find(".variable-regex-l0-label").addClass("col-12");
+
+                    $s.find(".variable-regex-i1-container").hide();
+                    $s.find(".variable-regex-i0-container").removeClass("col-6");
+                    $s.find(".variable-regex-i0-container").addClass("col-12");
+                }
+
+                $s.find('.variable-regex-i0-input').val("");
+                $s.find('.variable-regex-i1-input').val("");
+            }
+
+            $('.variables-add-button').on('click', function() {
+                if ($('.task-variables-register-input').val() == "") alert("No variables entered!");
+                index = 0;
+                $('.variable-forms-container').html("");
+                variablesArray = $('.task-variables-register-input').val().split(",");
+                variablesArray.forEach(function(e) {
+
+                    variable = e.replace(/\s+/g, '');
+                    if (variable != "") {
+                        appendVaraiable(index, variable);
+                        index++;
+                    }
+
+                });
+
+            });
+
+
+            $('.form-send-button').on('click', function(e) {
+            	e.preventDefault();
+            	if(!successResult){
+            		alert("Your task has not been sent!\n\nForm filled out incorrectly\n\nPossible solutions:\n- Check all requred fields\n- Check the mathematical formula\n\nThe result has to be marked in green");
+            		return;
+            	}
+                sendForm();
+                DataExchange.submitTask();
+                $("#exampleModal").modal(); 
+            });
+
+			$('#exampleModal').on('hidden.bs.modal', function () {
+				if(successResult)
+			    	location.reload();
+			})
+
+
+            $('.task-formula-input') .on('input', function(){
+                sendForm();
+            });
+            
+
+        });
+    </script>
+  <script src="assets_files/latest.js?config=AM_CHTML"></script>
+  <style> b,
+        strong {
+            font-weight: 400;
+        }
+        
+        .bootstrap-select > .dropdown-toggle::after {
+            top: 16px!important;
+            position: absolute!important;
+            right: 8px!important;
+        }
+        
+        .overflow-auto {
+            overflow: auto;
+        }
+		.round{
+		    border-top-left-radius: 0.25rem;
+		    border-top-right-radius: 0.25rem;
+		    border-bottom-left-radius: 0.25rem;
+		    border-bottom-right-radius: 0.25rem;
+		}
+		.fixed-bottom{
+		    z-index: 104;
+		}
+		.noselect {
+			-webkit-touch-callout: none; 
+		    -webkit-user-select: none;
+		    user-select: none;
+		    cursor: default;
+		}
+    </style>
+  <style> #task-input mark {}
+    </style>
+</head>
+
+<body style="">
+  <div class="text-center py-3 pb-5 noselect" style="">
+    <div class="container mx-auto px-4">
+      <div class="row">
+        <div class="mx-auto px-0 col-12" style="">
+          <h1>Adding a new task</h1>
+          <p class="mb-3">Your task will be added to the database. Remember to check your formula carefully.&nbsp;Make sure that it will work correctly for different data. Exemplary data is displayed in the fields.</p>
+          <form class="text-left main-form" action="" method="GE">
+            <div class="form-group">
+              <label>Content of the task</label>
+              <div class="form-group">
+                <textarea class="form-control task-input" rows="1" style="height: 38px;resize: none;" placeholder="Switch is closed at t=0 calculate duration of the transient..." name="task-input"></textarea>
+                <div class="badge badge-pill badge-warning task-alert" style="display:none;" role="alert"></div>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Variables used in calculations (separated by a comma)</label>
+              <div class="row">
+                <div class="pr-0 col-md-9 col-7" style="">
+                  <div class="w-100 col-12 px-0">
+                    <input type="text" class="form-control task-variables-register-input w-100" placeholder="r, c, t (NO CAPITAL LETTERS!)" name="task-variables-register-input">
+                  </div>
+                </div>
+                <div class="col-md-3 col-5" style=""><a class="btn w-100 btn-info variables-add-button" href="#">Register varaiables</a></div>
+              </div>
+            </div>
+            <div class="form-group variable-forms-container"></div>
+            <div class="form-group">
+              <label>Formula to solve the task</label>
+              <div class="row">
+                <div class="col-md-12 col-12" style="">
+                  <div class="row">
+                    <div class="col-md-12">
+                      <div class="ioArea mb-2 text-center px-1" id="task-formula-rendering">`sqrt(5^2+7^2+11^2+(8-2)^2)`</div>
+                    </div>
+                  </div>
+                  <input type="text" class="form-control ioArea task-formula-input" id="task-formula-input" placeholder="sqrt(5^2+7^2+11^2+(8-2)^2)" name="task-formula-input">
+                </div>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Unit of measure</label>
+              <input type="text" class="form-control task-unit-input" placeholder="mH" name="task-unit-input"> </div>
+            <!--<div class="form-group">
+              <div class="form-check text-center"> <input class="form-check-input" type="checkbox" id="form21" value="on"> <label class="form-check-label" for="form21"> I Agree with <a href="#">Term and Conditions</a> of the service </label> </div>
+            </div>-->
+            <div class="form-group">
+              <label>Additional information</label>
+              <div class="form-group">
+                <textarea class="form-control task-additional-information-input" rows="1" style="height: 38px;resize: none;" placeholder="Very difficult. prof. Damian looks suspiciously at anyone who..." name="task-additional-information-input"></textarea>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-12 text-center">
+                <button type="submit" class="btn btn-primary form-send-button">Send</button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+    <div class="navbar footer fixed-bottom p-0">
+      <div class="container bg-light round pt-1 text-left">
+        <label><span class="badge">Result: </span><span class="main-status-label"><span class="badge badge-pill badge-info"><i class="fas fa-info-circle"></i> First add the task content and at least one variable</span></span></label>
+      </div>
+    </div>
+  </div>
+  <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel"></h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">×</span>
+          </button>
+        </div>
+        <div class="modal-body">Task added successfully!</div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="assets_files/popper.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+  <script src="assets_files/bootstrap.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+  <script>selected_mode = "add_task"</script>
+  <script type="text/javascript" src="assets_files/updater.js"></script>
+</body>
+
+</html>
