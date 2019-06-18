@@ -126,7 +126,7 @@ VariableObject* addVariableObjectToList(short int index, short int selectedMode,
 			searchedObject->generatedRegex = regex;
 			searchedObject->valueFound = valueFound;
 
-			printf("UPDATER\n");
+			//printf("UPDATER\n");
 			//printAllVariableObjects(variableListHead);
 
 			return searchedObject;
@@ -146,7 +146,7 @@ VariableObject* addVariableObjectToList(short int index, short int selectedMode,
 
 			getLastVariableObject(variableListHead)->nextVariable = newVariableObject;	
 
-			printf("DODWANIE\n");
+			//printf("DODWANIE\n");
 
 			//printAllVariableObjects(variableListHead);
 
@@ -164,7 +164,7 @@ VariableObject* addVariableObjectToList(short int index, short int selectedMode,
 		variableListHead->valueFound = valueFound;
 		variableListHead->nextVariable = NULL;
 
-		printf("PIERWSZY\n");
+		//printf("PIERWSZY\n");
 
 		//printAllVariableObjects(variableListHead);
 

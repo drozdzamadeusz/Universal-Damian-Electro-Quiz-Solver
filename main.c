@@ -42,36 +42,7 @@ main(int argc, char* argv[]){
 
 
 
-    showMainMenu(argc, argv);
+    initMainMenu(argc, argv);
 
-    //fclose(stdout);
-
-/*
-  char choice=0;
-  while(choice!='3')
-  {
-    printf("\n\tMENU DEMONSTRATION");
-    printf("\n\t------------------------------");
-    printf("\n\n\t 1. ADD A TASK");
-    printf("\n\t 2. SOLVE THE TASK");
-    printf("\n\t 3. EXIT");
-    printf("\n\n Enter Your Choice: ");
-    scanf(" %c", &choice);
-    switch(choice)
-    {
-    case '1':
-        initAddTaskWindow(argc, argv);
-        break;
-    case '2':
-        solveTask();
-        break;
-    case '3':
-        printf("\n\nYOU SELECTED OPTION 3\n");
-        break;
-    default:
-        printf("\n\nINVALID SELECTION...Please try again\n");
-    }
-    (void)getch();
-  }*/
   return 0;
 }
