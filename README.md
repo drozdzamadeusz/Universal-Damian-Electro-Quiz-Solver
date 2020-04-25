@@ -8,6 +8,6 @@ Technical Documentation.pdf
 and on site: https://e146.eu
 
 
-## Video project demonstration 
+## Video demonstration 
 
-https://1drv.ms/v/s!AoXfPomWMn2tg9whSuJ67Ig4hPf8JA
+https://streamable.com/i06nau
