@@ -1,1 +1,1 @@
-# project-sem2
+# Completed project, the final report and doxygen documentation
