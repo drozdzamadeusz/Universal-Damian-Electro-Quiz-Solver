@@ -1,4 +1,4 @@
-# Universal Damian Electro Quiz Solver
+# Universa Electro Quiz Solver
 
 ## Information about the project in files:
 ```
